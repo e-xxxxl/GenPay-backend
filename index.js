@@ -25,8 +25,19 @@ app.post('/submit-waitlist', async (req, res) => {
       body: JSON.stringify(formData),
     });
 
-    const data = await response.json();
-    res.status(200).json({ message: 'Success', data });
+    const text = await response.text(); // Get raw response
+    console.log('GAS raw response:', text);
+
+    try {
+      const data = JSON.parse(text); // Try parsing
+      res.status(200).json({ message: 'Success', data });
+    } catch (parseError) {
+      console.error('Error parsing GAS response:', parseError);
+      res.status(500).json({
+        message: 'Failed to parse GAS response',
+        raw: text,
+      });
+    }
   } catch (err) {
     console.error('Error forwarding to GAS:', err);
     res.status(500).json({ message: 'Failed to submit to GAS' });
